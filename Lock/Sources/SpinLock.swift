@@ -66,7 +66,7 @@ func TestSpinLock() {
         Thread.detachNewThread {
             Thread.sleep(forTimeInterval: 1)  // for concurrent
 
-            pthread_set_qos_class_self_np(QOS_CLASS_BACKGROUND, 0)
+            pthread_set_qos_class_self_np(QOS_CLASS_BACKGROUND, 0)   // 降低优先级测试
             lock.lock()
             value += 1
             lock.unlock()
