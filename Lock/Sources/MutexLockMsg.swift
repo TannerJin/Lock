@@ -38,20 +38,10 @@ private let mach_port_null = mach_port_t(MACH_PORT_NULL)
 private struct message {
     fileprivate var base: mach_msg_base_t
     fileprivate var ool: mach_msg_ool_descriptor_t
-    
-    public var msgId: Int {
-        return Int(base.header.msgh_id)
-    }
-    
-    public var data: Data? {
-        guard let baseAddress = ool.address else { return nil }
-        let bufferPointer = UnsafeMutableBufferPointer(start: baseAddress.assumingMemoryBound(to: UInt8.self), count: Int(ool.size))
-        return Data(buffer: bufferPointer)
-    }
 }
 
 private func mach_msgh_bits(remote: mach_msg_bits_t, local: mach_msg_bits_t) -> mach_msg_bits_t {
-    return ((remote) | ((local) << 8))
+    return (remote) | ((local) << 8)
 }
 
 
@@ -60,7 +50,8 @@ public func lock_message_send(port remotePort: mach_port_t, timeout: mach_msg_ti
     header.msgh_bits = mach_msgh_bits(remote: mach_msg_bits_t(MACH_MSG_TYPE_COPY_SEND), local: 0);
     header.msgh_size = mach_msg_size_t(MemoryLayout<mach_msg_header_t>.size);
     header.msgh_remote_port = remotePort;
-    header.msgh_local_port = mach_port_null;
+    header.msgh_local_port = mach_port_null
+    
     mach_msg_send(&header)
 }
 
