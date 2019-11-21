@@ -57,6 +57,7 @@ public class SpinLock {
 }
 
 
+// MARK: Test
 func TestSpinLock() {
     let thread_count = 1000
     let lock = SpinRecursiveLock()

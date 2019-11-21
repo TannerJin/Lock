@@ -15,7 +15,7 @@ public class MutexLock {
     private var value: Int32 = 0
     
     init?() {
-        if let _context = malloc(0x20), let localPort = mallocPortWith(context: UInt(bitPattern: _context)) {
+        if let _context = malloc(MemoryLayout<UnsafeRawPointer>.size), let localPort = mallocPortWith(context: UInt(bitPattern: _context)) {
             context = _context
             lock_msg_port = localPort
         } else {
@@ -43,7 +43,7 @@ public class MutexLock {
 }
 
 
-// MARK Test
+// MARK: Test
 func TestMutexLock() {
     let thread_count = 1000
     let lock = MutexLock()

@@ -31,48 +31,29 @@ public func freePort(_ port: mach_port_t) {
 }
 
 
-// MARK: Message
-
+// MARK: Message(Simple)
 private let mach_port_null = mach_port_t(MACH_PORT_NULL)
-
-private struct message {
-    fileprivate var base: mach_msg_base_t
-    fileprivate var ool: mach_msg_ool_descriptor_t
-}
 
 private func mach_msgh_bits(remote: mach_msg_bits_t, local: mach_msg_bits_t) -> mach_msg_bits_t {
     return (remote) | ((local) << 8)
 }
 
-
-public func lock_message_send(port remotePort: mach_port_t, timeout: mach_msg_timeout_t = MACH_MSG_TIMEOUT_NONE) {
+public func lock_message_send(port remotePort: mach_port_t) {
     var header = mach_msg_header_t()
-    header.msgh_bits = mach_msgh_bits(remote: mach_msg_bits_t(MACH_MSG_TYPE_COPY_SEND), local: 0);
-    header.msgh_size = mach_msg_size_t(MemoryLayout<mach_msg_header_t>.size);
-    header.msgh_remote_port = remotePort;
+    header.msgh_remote_port = remotePort
     header.msgh_local_port = mach_port_null
+    header.msgh_bits = mach_msgh_bits(remote: mach_msg_bits_t(MACH_MSG_TYPE_COPY_SEND), local: 0);
+    header.msgh_size = mach_msg_size_t(MemoryLayout<mach_msg_header_t>.size)
     
     mach_msg_send(&header)
 }
 
-
-public func lock_message_receive(port replyPort: mach_port_t, timeout: mach_msg_timeout_t = MACH_MSG_TIMEOUT_NONE) {
+public func lock_message_receive(port replyPort: mach_port_t) {
     var recv_msg = mach_msg_header_t()
     recv_msg.msgh_remote_port = mach_port_null
     recv_msg.msgh_local_port = replyPort
     recv_msg.msgh_bits = 0
-    let msg_size = mach_msg_size_t(MemoryLayout<message>.size) + 8
-    recv_msg.msgh_size = msg_size
-    
-    let msg_body = mach_msg_body_t()
-    let msg_base = mach_msg_base_t(header: recv_msg, body: msg_body)
-    
-    let msg_ool = mach_msg_ool_descriptor_t()
-    var emtyMessage = message(base: msg_base, ool: msg_ool)
-    
-    let recv_msg_addr = withUnsafePointer(to: &emtyMessage) { (pointer) -> UnsafeMutablePointer<mach_msg_header_t> in
-        return UnsafeMutableRawPointer(mutating: pointer).assumingMemoryBound(to: mach_msg_header_t.self)
-    }
+    recv_msg.msgh_size = mach_msg_size_t(MemoryLayout<mach_msg_header_t>.size)
 
-    mach_msg_receive(recv_msg_addr)
+    mach_msg_receive(&recv_msg)
 }
