@@ -23,37 +23,49 @@ public func mallocPortWith(context: UInt) -> mach_port_t? {
     if ret != KERN_SUCCESS {
         return nil
     }
+    
     return port
 }
 
-public func freePort(_ port: mach_port_t) {
-    mach_port_deallocate(mach_task_self_, port)
+@discardableResult
+public func freePort(_ port: mach_port_t, context: UInt) -> kern_return_t {
+    let ret = mach_port_destruct(mach_task_self_, port, -1, mach_port_context_t(context))
+    return ret
 }
 
 
-// MARK: Message(Simple)
+// MARK: Message(Simple MSG not Complete MSG)
 private let mach_port_null = mach_port_t(MACH_PORT_NULL)
 
 private func mach_msgh_bits(remote: mach_msg_bits_t, local: mach_msg_bits_t) -> mach_msg_bits_t {
     return (remote) | ((local) << 8)
 }
 
-public func lock_message_send(port remotePort: mach_port_t) {
+@discardableResult
+public func lock_message_send(port remotePort: mach_port_t) -> mach_msg_return_t {
     var header = mach_msg_header_t()
     header.msgh_remote_port = remotePort
     header.msgh_local_port = mach_port_null
-    header.msgh_bits = mach_msgh_bits(remote: mach_msg_bits_t(MACH_MSG_TYPE_COPY_SEND), local: 0);
+    header.msgh_bits = mach_msgh_bits(remote: mach_msg_bits_t(MACH_MSG_TYPE_COPY_SEND), local: 0)
     header.msgh_size = mach_msg_size_t(MemoryLayout<mach_msg_header_t>.size)
     
-    mach_msg_send(&header)
+    let ret = mach_msg_send(&header)
+    return ret
 }
 
-public func lock_message_receive(port replyPort: mach_port_t) {
+@discardableResult
+public func lock_message_receive(port replyPort: mach_port_t) -> mach_msg_return_t {
     var recv_msg = mach_msg_header_t()
     recv_msg.msgh_remote_port = mach_port_null
     recv_msg.msgh_local_port = replyPort
     recv_msg.msgh_bits = 0
-    recv_msg.msgh_size = mach_msg_size_t(MemoryLayout<mach_msg_header_t>.size)
+    recv_msg.msgh_size = mach_msg_size_t(MemoryLayout<mach_msg_header_t>.size) + 8
 
-    mach_msg_receive(&recv_msg)
+    var msg = mach_msg_base_t(header: recv_msg, body: mach_msg_body_t())
+    let recv_msg_addr = withUnsafePointer(to: &msg) { (pointer) -> UnsafeMutablePointer<mach_msg_header_t> in
+        return UnsafeMutableRawPointer(mutating: pointer).assumingMemoryBound(to: mach_msg_header_t.self)
+    }
+    
+    let ret = mach_msg_receive(recv_msg_addr)
+    return ret
 }

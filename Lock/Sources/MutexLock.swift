@@ -24,7 +24,7 @@ public class MutexLock {
     }
     
     deinit {
-        freePort(lock_msg_port)
+        freePort(lock_msg_port, context: UInt(bitPattern: context))
         free(context)
     }
     

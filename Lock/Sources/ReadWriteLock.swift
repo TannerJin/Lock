@@ -17,7 +17,7 @@ public class ReadWriteLock {
     
     // -1: has write thread
     // 0 : has not write and read threads
-    // >0: has read threads
+    // >0: count of read threads
     private var read_threads_count: Int64 = 0
     private var write_thread: UInt32 = 0
     
@@ -39,8 +39,8 @@ public class ReadWriteLock {
     }
     
     deinit {
-        freePort(read_msg_port)
-        freePort(write_msg_port)
+        freePort(read_msg_port, context: UInt(bitPattern: read_context))
+        freePort(write_msg_port, context: UInt(bitPattern: write_context))
         free(read_context)
         free(write_context)
     }
@@ -57,7 +57,7 @@ public class ReadWriteLock {
     private func lockRead() {
         while true {
             // 没有写线程 (read_threads_count != -1)
-            let pre_read_count = OSAtomicAdd64(0, &read_threads_count)  // 原子加载值
+            let pre_read_count = OSAtomicAdd64(0, &read_threads_count)  // 原子加载read_threads_count
             
             if pre_read_count >= 0 {
                 let new_read_count = pre_read_count + 1
@@ -79,7 +79,6 @@ public class ReadWriteLock {
             if pre_read_count == 0 {
                 let new_read_count: Int64 = -1
                 if OSAtomicCompareAndSwap64(pre_read_count, new_read_count, &read_threads_count) {
-                    // 单一写线程修改
                     write_thread = mach_thread_self()
                     break
                 }
@@ -127,7 +126,7 @@ func TestReadWriteLock() {
     
     assert(lock != nil)
         
-    for i in 0..<thread_count {
+    for _ in 0..<thread_count {
         Thread.detachNewThread {
             Thread.sleep(forTimeInterval: 0.99)  // for concurrent
 
@@ -140,7 +139,7 @@ func TestReadWriteLock() {
             Thread.sleep(forTimeInterval: 1)  // for concurrent
 
             lock!.lock(.read)
-            print("readWriteLock => index \(i)  value \(value)")
+//            print("readWriteLock => index \(i)  value \(value)")
             lock!.unlock()
         }
     }
