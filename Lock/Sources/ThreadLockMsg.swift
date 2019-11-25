@@ -9,7 +9,7 @@
 import Foundation
 
 // MARK: Port
-public func mallocPortWith(context: UInt) -> mach_port_t? {
+public func constructPortWith(context: UInt) -> mach_port_t? {
     var port: mach_port_t = 0
     
     var options = mach_port_options_t()
@@ -28,9 +28,25 @@ public func mallocPortWith(context: UInt) -> mach_port_t? {
 }
 
 @discardableResult
-public func freePort(_ port: mach_port_t, context: UInt) -> kern_return_t {
+public func destructPort(_ port: mach_port_t, context: UInt) -> kern_return_t {
     let ret = mach_port_destruct(mach_task_self_, port, -1, mach_port_context_t(context))
     return ret
+}
+
+
+public func allocatePort() -> mach_port_t? {
+    var port: mach_port_name_t = 0
+    let ret = mach_port_allocate(mach_task_self_, MACH_PORT_RIGHT_RECEIVE, &port)
+    if ret == KERN_SUCCESS {
+        let ret2 = mach_port_insert_right(mach_task_self_, port, port, mach_msg_type_name_t(MACH_MSG_TYPE_MAKE_SEND))
+        if ret2 == KERN_SUCCESS {
+            return port
+        } else {
+            return nil
+        }
+    } else {
+        return nil
+    }
 }
 
 
@@ -46,10 +62,16 @@ public func lock_message_send(port remotePort: mach_port_t) -> mach_msg_return_t
     var header = mach_msg_header_t()
     header.msgh_remote_port = remotePort
     header.msgh_local_port = mach_port_null
-    header.msgh_bits = mach_msgh_bits(remote: mach_msg_bits_t(MACH_MSG_TYPE_COPY_SEND), local: 0)
+    header.msgh_bits = mach_msgh_bits(remote: mach_msg_bits_t(MACH_MSG_TYPE_MAKE_SEND), local: 0)
     header.msgh_size = mach_msg_size_t(MemoryLayout<mach_msg_header_t>.size)
     
     let ret = mach_msg_send(&header)
+    #if DEBUG
+    if ret != KERN_SUCCESS {
+        assert(false)
+    }
+    #endif
+
     return ret
 }
 
@@ -67,5 +89,10 @@ public func lock_message_receive(port replyPort: mach_port_t) -> mach_msg_return
     }
     
     let ret = mach_msg_receive(recv_msg_addr)
+    #if DEBUG
+    if ret != KERN_SUCCESS {
+        assert(false)
+    }
+    #endif
     return ret
 }

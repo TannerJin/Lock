@@ -20,5 +20,4 @@ TestMutexRecursiveLock()
 
 TestReadWriteLock()
 
-
 print("\nLock Test Success 🚀🚀🚀")

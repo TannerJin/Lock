@@ -9,23 +9,20 @@
 import Foundation
 
 public class MutexLock {
-    private var context: UnsafeMutableRawPointer
     private var lock_msg_port: mach_port_t
     
     private var value: Int32 = 0
     
     init?() {
-        if let _context = malloc(MemoryLayout<UnsafeRawPointer>.size), let localPort = mallocPortWith(context: UInt(bitPattern: _context)) {
-            context = _context
-            lock_msg_port = localPort
+        if let port = allocatePort() {
+            lock_msg_port = port
         } else {
             return nil
         }
     }
     
     deinit {
-        freePort(lock_msg_port, context: UInt(bitPattern: context))
-        free(context)
+        mach_port_deallocate(mach_task_self_, lock_msg_port)
     }
     
     public func lock() {

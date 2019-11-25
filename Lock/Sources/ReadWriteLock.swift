@@ -21,17 +21,12 @@ public class ReadWriteLock {
     private var read_threads_count: Int64 = 0
     private var write_thread: UInt32 = 0
     
-    private var read_context: UnsafeMutableRawPointer
     private var read_msg_port: mach_port_t
-    private var write_context: UnsafeMutableRawPointer
     private var write_msg_port: mach_port_t
     
     public init?() {
-        if let _read_context = malloc(MemoryLayout<UnsafeRawPointer>.size), let read_port = mallocPortWith(context: UInt(bitPattern: _read_context)),
-            let _write_context = malloc(MemoryLayout<UnsafeRawPointer>.size), let write_port = mallocPortWith(context: UInt(bitPattern: _write_context)) {
-            read_context = _read_context
+        if let read_port = allocatePort(), let write_port = allocatePort() {
             read_msg_port = read_port
-            write_context = _write_context
             write_msg_port = write_port
         } else {
            return nil
@@ -39,10 +34,8 @@ public class ReadWriteLock {
     }
     
     deinit {
-        freePort(read_msg_port, context: UInt(bitPattern: read_context))
-        freePort(write_msg_port, context: UInt(bitPattern: write_context))
-        free(read_context)
-        free(write_context)
+        mach_port_deallocate(mach_task_self_, read_msg_port)
+        mach_port_deallocate(mach_task_self_, write_msg_port)
     }
     
     // MARK: - Lock

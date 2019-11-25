@@ -16,7 +16,7 @@ class MutexRecursiveLock {
     private var recursive_count = 0
     
     init?() {
-        if let _context = malloc(MemoryLayout<UnsafeRawPointer>.size), let localPort = mallocPortWith(context: UInt(bitPattern: _context)) {
+        if let _context = malloc(MemoryLayout<UnsafeRawPointer>.size), let localPort = constructPortWith(context: UInt(bitPattern: _context)) {
             context = _context
             lock_msg_port = localPort
         } else {
@@ -25,7 +25,7 @@ class MutexRecursiveLock {
     }
     
     deinit {
-        freePort(lock_msg_port, context:  UInt(bitPattern: context))
+        destructPort(lock_msg_port, context:  UInt(bitPattern: context))
         free(context)
     }
     
