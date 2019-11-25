@@ -21,12 +21,12 @@ public class SpinLock {
         // QOS_CLASS_USER_INITIATED    : 25
         // QOS_CLASS_USER_INTERACTIVE  : 33
 
-        // fix优先级反转:
+        // fix优先级反转(提高获取到锁的线程优先级) or (降低没获取到锁的线程优先级)
         // lock   提升优先级
         // unlock 恢复线程优先级
         let preQosClassSelf = qos_class_self()
 
-        if preQosClassSelf.rawValue <= QOS_CLASS_BACKGROUND.rawValue {
+        if preQosClassSelf.rawValue <= QOS_CLASS_DEFAULT.rawValue {
             let pointer = malloc(MemoryLayout<qos_class_t>.size)
             pointer?.bindMemory(to: qos_class_t.self, capacity: 1).initialize(to: preQosClassSelf)
 
@@ -35,7 +35,7 @@ public class SpinLock {
             }
             pthread_setspecific(SpinLock.PreQosClassKey, pointer)
 
-            pthread_set_qos_class_self_np(QOS_CLASS_DEFAULT, 0)
+            pthread_set_qos_class_self_np(QOS_CLASS_USER_INITIATED, 0)
         }
     }
 

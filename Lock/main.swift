@@ -10,7 +10,6 @@ import Foundation
 
 print("Hello, Lock!")
 
-
 TestSpinLock()
 
 TestSpinRecursiveLock()
@@ -18,6 +17,8 @@ TestSpinRecursiveLock()
 TestMutexLock()
 
 TestMutexRecursiveLock()
+
+TestReadWriteLock()
 
 
 print("\nLock Test Success 🚀🚀🚀")

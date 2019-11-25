@@ -9,7 +9,8 @@
 /* Begin PBXBuildFile section */
 		A93715DD2386797700850906 /* MutexLock.swift in Sources */ = {isa = PBXBuildFile; fileRef = A93715DC2386797700850906 /* MutexLock.swift */; };
 		A93715DF2386798D00850906 /* MutexRecursiveLock.swift in Sources */ = {isa = PBXBuildFile; fileRef = A93715DE2386798D00850906 /* MutexRecursiveLock.swift */; };
-		A93715E1238680E100850906 /* MutexLockMsg.swift in Sources */ = {isa = PBXBuildFile; fileRef = A93715E0238680E100850906 /* MutexLockMsg.swift */; };
+		A93715E1238680E100850906 /* ThreadLockMsg.swift in Sources */ = {isa = PBXBuildFile; fileRef = A93715E0238680E100850906 /* ThreadLockMsg.swift */; };
+		A93715E423878B5000850906 /* ReadWriteLock.swift in Sources */ = {isa = PBXBuildFile; fileRef = A93715E323878B5000850906 /* ReadWriteLock.swift */; };
 		A959EC6223866ACB00A918A9 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = A959EC6123866ACB00A918A9 /* main.swift */; };
 		A959EC6A23866AE000A918A9 /* SpinLock.swift in Sources */ = {isa = PBXBuildFile; fileRef = A959EC6923866AE000A918A9 /* SpinLock.swift */; };
 		A959EC6D2386747B00A918A9 /* SpinRecursiveLock.swift in Sources */ = {isa = PBXBuildFile; fileRef = A959EC6C2386747B00A918A9 /* SpinRecursiveLock.swift */; };
@@ -30,8 +31,9 @@
 /* Begin PBXFileReference section */
 		A93715DC2386797700850906 /* MutexLock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MutexLock.swift; sourceTree = "<group>"; };
 		A93715DE2386798D00850906 /* MutexRecursiveLock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MutexRecursiveLock.swift; sourceTree = "<group>"; };
-		A93715E0238680E100850906 /* MutexLockMsg.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MutexLockMsg.swift; sourceTree = "<group>"; };
+		A93715E0238680E100850906 /* ThreadLockMsg.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThreadLockMsg.swift; sourceTree = "<group>"; };
 		A93715E22386969000850906 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = SOURCE_ROOT; };
+		A93715E323878B5000850906 /* ReadWriteLock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReadWriteLock.swift; sourceTree = "<group>"; };
 		A959EC5E23866ACB00A918A9 /* Lock */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = Lock; sourceTree = BUILT_PRODUCTS_DIR; };
 		A959EC6123866ACB00A918A9 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 		A959EC6923866AE000A918A9 /* SpinLock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpinLock.swift; sourceTree = "<group>"; };
@@ -82,7 +84,8 @@
 				A959EC6C2386747B00A918A9 /* SpinRecursiveLock.swift */,
 				A93715DC2386797700850906 /* MutexLock.swift */,
 				A93715DE2386798D00850906 /* MutexRecursiveLock.swift */,
-				A93715E0238680E100850906 /* MutexLockMsg.swift */,
+				A93715E0238680E100850906 /* ThreadLockMsg.swift */,
+				A93715E323878B5000850906 /* ReadWriteLock.swift */,
 			);
 			path = Sources;
 			sourceTree = "<group>";
@@ -147,7 +150,8 @@
 			files = (
 				A959EC6A23866AE000A918A9 /* SpinLock.swift in Sources */,
 				A959EC6D2386747B00A918A9 /* SpinRecursiveLock.swift in Sources */,
-				A93715E1238680E100850906 /* MutexLockMsg.swift in Sources */,
+				A93715E423878B5000850906 /* ReadWriteLock.swift in Sources */,
+				A93715E1238680E100850906 /* ThreadLockMsg.swift in Sources */,
 				A93715DD2386797700850906 /* MutexLock.swift in Sources */,
 				A93715DF2386798D00850906 /* MutexRecursiveLock.swift in Sources */,
 				A959EC6223866ACB00A918A9 /* main.swift in Sources */,
