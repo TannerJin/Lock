@@ -17,7 +17,7 @@ public class ReadWriteLock {
     
     // -1: has write thread
     // 0 : has not write and read threads
-    // >0: has write threads
+    // >0: has read threads
     private var read_threads_count: Int64 = 0
     private var write_thread: UInt32 = 0
     
