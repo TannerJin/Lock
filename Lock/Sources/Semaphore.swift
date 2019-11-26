@@ -57,33 +57,42 @@ public class Semaphore {
 // MARK: Test
 
 func TestSemaphore() {
-    let concurrent_count = 4
+    let concurrent_count = 1000
     let semaphore = Semaphore(value: Int64(concurrent_count))
     
     assert(semaphore != nil)
     
-    var array = [0, 0, 0, 0]
+    var array = Array<Int>(repeating: 0, count: concurrent_count)
+    let spinLock = SpinLock()
     
     for i in 0..<concurrent_count {
+        semaphore!.wait()
+        
         Thread.detachNewThread {
-            semaphore!.wait()
-            Thread.sleep(forTimeInterval: 1)     // for concurrent
-            array[i] = i
+            Thread.sleep(forTimeInterval: 0.5)    // for semaphore wait
+            
+            spinLock.lock()
+            array[i] = i                          // 多线程修改
+            spinLock.unlock()
+            
+            Thread.sleep(forTimeInterval: 1)      // for semaphore wait
             semaphore!.signal()
         }
     }
     
     Thread.detachNewThread {
-        Thread.sleep(forTimeInterval: 0.2)      // for 不抢占信号量
         semaphore?.wait()
         
+        let orig_result = Array<Int>(0..<concurrent_count).reduce(0) { (result, element) -> Int in
+            result + element
+        }
         let result = array.reduce(0) { (result, element) -> Int in
             result + element
         }
-        assert(result == 0+1+2+3)
+        assert(result == orig_result)
         
         semaphore?.signal()
     }
     
-    RunLoop.current.run(until: Date() + 2)
+    RunLoop.current.run(until: Date() + 3)
 }
