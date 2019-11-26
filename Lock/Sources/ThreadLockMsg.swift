@@ -59,16 +59,16 @@ private func mach_msgh_bits(remote: mach_msg_bits_t, local: mach_msg_bits_t) -> 
 
 @discardableResult
 public func lock_message_send(port remotePort: mach_port_t) -> mach_msg_return_t {
-    var header = mach_msg_header_t()
-    header.msgh_remote_port = remotePort
-    header.msgh_local_port = mach_port_null
-    header.msgh_bits = mach_msgh_bits(remote: mach_msg_bits_t(MACH_MSG_TYPE_MAKE_SEND), local: 0)
-    header.msgh_size = mach_msg_size_t(MemoryLayout<mach_msg_header_t>.size)
+    var msg_header = mach_msg_header_t()
+    msg_header.msgh_remote_port = remotePort
+    msg_header.msgh_local_port = mach_port_null
+    msg_header.msgh_bits = mach_msgh_bits(remote: mach_msg_bits_t(MACH_MSG_TYPE_MAKE_SEND), local: 0)
+    msg_header.msgh_size = mach_msg_size_t(MemoryLayout<mach_msg_header_t>.size)
     
-    let ret = mach_msg_send(&header)
+    let ret = mach_msg_send(&msg_header)
     #if DEBUG
     if ret != KERN_SUCCESS {
-        assert(false)
+        assert(false, "msg send failure")
     }
     #endif
 
@@ -77,21 +77,22 @@ public func lock_message_send(port remotePort: mach_port_t) -> mach_msg_return_t
 
 @discardableResult
 public func lock_message_receive(port replyPort: mach_port_t) -> mach_msg_return_t {
-    var recv_msg = mach_msg_header_t()
-    recv_msg.msgh_remote_port = mach_port_null
-    recv_msg.msgh_local_port = replyPort
-    recv_msg.msgh_bits = 0
-    recv_msg.msgh_size = mach_msg_size_t(MemoryLayout<mach_msg_header_t>.size) + 8
+    var msg_header = mach_msg_header_t()
+    msg_header.msgh_remote_port = mach_port_null
+    msg_header.msgh_local_port = replyPort
+    msg_header.msgh_bits = 0
+    msg_header.msgh_size = mach_msg_size_t(MemoryLayout<mach_msg_header_t>.size) + 8
 
-    var msg = mach_msg_base_t(header: recv_msg, body: mach_msg_body_t())
-    let recv_msg_addr = withUnsafePointer(to: &msg) { (pointer) -> UnsafeMutablePointer<mach_msg_header_t> in
+    var msg = mach_msg_base_t(header: msg_header, body: mach_msg_body_t())
+    
+    let msg_header_addr = withUnsafePointer(to: &msg) { (pointer) -> UnsafeMutablePointer<mach_msg_header_t> in
         return UnsafeMutableRawPointer(mutating: pointer).assumingMemoryBound(to: mach_msg_header_t.self)
     }
     
-    let ret = mach_msg_receive(recv_msg_addr)
+    let ret = mach_msg_receive(msg_header_addr)
     #if DEBUG
     if ret != KERN_SUCCESS {
-        assert(false)
+        assert(false, "msg receive failure")
     }
     #endif
     return ret

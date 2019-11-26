@@ -8,6 +8,8 @@
 
 import Foundation
 
+// 自旋锁
+
 public class SpinLock {
     private var value: Int32 = 0
     private static var PreQosClassKey: pthread_key_t = 0
@@ -21,7 +23,7 @@ public class SpinLock {
         // QOS_CLASS_USER_INITIATED    : 25
         // QOS_CLASS_USER_INTERACTIVE  : 33
 
-        // fix优先级反转(提高获取到锁的线程优先级) or (降低没获取到锁的线程优先级)
+        // fix优先级反转(提高获取到锁的线程优先级, 目前是这个) or (降低没获取到锁的线程优先级)
         // lock   提升优先级
         // unlock 恢复线程优先级
         let preQosClassSelf = qos_class_self()

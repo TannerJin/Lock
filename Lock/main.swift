@@ -20,4 +20,6 @@ TestMutexRecursiveLock()
 
 TestReadWriteLock()
 
+TestSemaphore()
+
 print("\nLock Test Success 🚀🚀🚀")

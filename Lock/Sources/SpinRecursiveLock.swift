@@ -8,6 +8,8 @@
 
 import Foundation
 
+// 递归自旋锁
+
 public class SpinRecursiveLock {
     private var thread: Int = -1
     private var recursive_count = 0

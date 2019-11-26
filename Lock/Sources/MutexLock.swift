@@ -8,6 +8,8 @@
 
 import Foundation
 
+// MARK: 互斥锁
+
 public class MutexLock {
     private var lock_msg_port: mach_port_t
     
