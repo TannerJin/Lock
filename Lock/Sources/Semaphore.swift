@@ -66,9 +66,8 @@ func TestSemaphore() {
     let spinLock = SpinLock()
     
     for i in 0..<concurrent_count {
-        semaphore!.wait()
-        
         Thread.detachNewThread {
+            semaphore!.wait()
             Thread.sleep(forTimeInterval: 0.5)    // for semaphore wait
             
             spinLock.lock()
@@ -81,6 +80,7 @@ func TestSemaphore() {
     }
     
     Thread.detachNewThread {
+        Thread.sleep(forTimeInterval: 0.5)
         semaphore?.wait()
         
         let orig_result = Array<Int>(0..<concurrent_count).reduce(0) { (result, element) -> Int in
