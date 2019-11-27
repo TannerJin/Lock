@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		A91CC880238CBE6300351964 /* Semaphore.swift in Sources */ = {isa = PBXBuildFile; fileRef = A91CC87F238CBE6300351964 /* Semaphore.swift */; };
+		A91CC882238E090300351964 /* ConditionLock.swift in Sources */ = {isa = PBXBuildFile; fileRef = A91CC881238E090300351964 /* ConditionLock.swift */; };
 		A93715DD2386797700850906 /* MutexLock.swift in Sources */ = {isa = PBXBuildFile; fileRef = A93715DC2386797700850906 /* MutexLock.swift */; };
 		A93715DF2386798D00850906 /* MutexRecursiveLock.swift in Sources */ = {isa = PBXBuildFile; fileRef = A93715DE2386798D00850906 /* MutexRecursiveLock.swift */; };
 		A93715E1238680E100850906 /* ThreadLockMsg.swift in Sources */ = {isa = PBXBuildFile; fileRef = A93715E0238680E100850906 /* ThreadLockMsg.swift */; };
@@ -31,6 +32,7 @@
 
 /* Begin PBXFileReference section */
 		A91CC87F238CBE6300351964 /* Semaphore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Semaphore.swift; sourceTree = "<group>"; };
+		A91CC881238E090300351964 /* ConditionLock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConditionLock.swift; sourceTree = "<group>"; };
 		A93715DC2386797700850906 /* MutexLock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MutexLock.swift; sourceTree = "<group>"; };
 		A93715DE2386798D00850906 /* MutexRecursiveLock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MutexRecursiveLock.swift; sourceTree = "<group>"; };
 		A93715E0238680E100850906 /* ThreadLockMsg.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThreadLockMsg.swift; sourceTree = "<group>"; };
@@ -88,6 +90,7 @@
 				A93715DE2386798D00850906 /* MutexRecursiveLock.swift */,
 				A91CC87F238CBE6300351964 /* Semaphore.swift */,
 				A93715E323878B5000850906 /* ReadWriteLock.swift */,
+				A91CC881238E090300351964 /* ConditionLock.swift */,
 				A93715E0238680E100850906 /* ThreadLockMsg.swift */,
 			);
 			path = Sources;
@@ -156,6 +159,7 @@
 				A93715E423878B5000850906 /* ReadWriteLock.swift in Sources */,
 				A93715E1238680E100850906 /* ThreadLockMsg.swift in Sources */,
 				A93715DD2386797700850906 /* MutexLock.swift in Sources */,
+				A91CC882238E090300351964 /* ConditionLock.swift in Sources */,
 				A93715DF2386798D00850906 /* MutexRecursiveLock.swift in Sources */,
 				A91CC880238CBE6300351964 /* Semaphore.swift in Sources */,
 				A959EC6223866ACB00A918A9 /* main.swift in Sources */,

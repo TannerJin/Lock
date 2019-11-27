@@ -11,7 +11,6 @@ import Foundation
 // MARK: 信号量
 
 public class Semaphore {
-    
     // >0: pass
     // =0: wait
     private var value: Int64
@@ -32,10 +31,10 @@ public class Semaphore {
     
     public func wait() {
         while true {
-            let pre_value = OSAtomicAdd64(0, &value)  // get value
-            if pre_value > 0 {
-                let new_value = pre_value - 1
-                if OSAtomicCompareAndSwap64(pre_value, new_value, &value) {
+            let old_value = OSAtomicAdd64(0, &value)  // get value
+            if old_value > 0 {
+                let new_value = old_value - 1
+                if OSAtomicCompareAndSwap64(old_value, new_value, &value) {
                     break
                 }
             } else {
@@ -94,5 +93,5 @@ func TestSemaphore() {
         semaphore?.signal()
     }
     
-    RunLoop.current.run(until: Date() + 3)
+    RunLoop.current.run(until: Date() + 3)    
 }

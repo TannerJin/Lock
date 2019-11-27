@@ -71,7 +71,6 @@ public func lock_message_send(port remotePort: mach_port_t) -> mach_msg_return_t
         assert(false, "msg send failure")
     }
     #endif
-
     return ret
 }
 

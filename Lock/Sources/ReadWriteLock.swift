@@ -52,11 +52,11 @@ public class ReadWriteLock {
     private func lockRead() {
         while true {
             // 没有写线程 (read_threads_count != -1)
-            let pre_read_count = OSAtomicAdd64(0, &read_threads_count)  // 原子加载read_threads_count
+            let old_read_count = OSAtomicAdd64(0, &read_threads_count)  // 原子加载read_threads_count
             
-            if pre_read_count >= 0 {
-                let new_read_count = pre_read_count + 1
-                if OSAtomicCompareAndSwap64(pre_read_count, new_read_count, &read_threads_count) {
+            if old_read_count >= 0 {
+                let new_read_count = old_read_count + 1
+                if OSAtomicCompareAndSwap64(old_read_count, new_read_count, &read_threads_count) {
                     break
                 }
             } else {
@@ -69,11 +69,11 @@ public class ReadWriteLock {
     private func lockWrite() {
         while true {
             // 没有写线程and读线程 (read_threads_count = 0)
-            let pre_read_count = OSAtomicAdd64(0, &read_threads_count)
+            let old_read_count = OSAtomicAdd64(0, &read_threads_count)
             
-            if pre_read_count == 0 {
+            if old_read_count == 0 {
                 let new_read_count: Int64 = -1
-                if OSAtomicCompareAndSwap64(pre_read_count, new_read_count, &read_threads_count) {
+                if OSAtomicCompareAndSwap64(old_read_count, new_read_count, &read_threads_count) {
                     write_thread = mach_thread_self()
                     break
                 }
@@ -143,4 +143,3 @@ func TestReadWriteLock() {
 
     assert(value == thread_count)
 }
-

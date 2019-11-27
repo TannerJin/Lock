@@ -12,7 +12,6 @@ import Foundation
 
 public class MutexLock {
     private var lock_msg_port: mach_port_t
-    
     private var value: Int32 = 0
     
     init?() {
