@@ -30,4 +30,4 @@
 
 基于原子操作，线程通信，线程对象(写线程)，线程数量(读线程)
 
-## [ConditionLock (读写锁)](https://github.com/TannerJin/Lock/blob/master/Lock/Sources/ConditionLock.swift)
+## [ConditionLock (条件锁)](https://github.com/TannerJin/Lock/blob/master/Lock/Sources/ConditionLock.swift)
