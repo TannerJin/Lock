@@ -46,9 +46,12 @@ public class ConditionLock {
     
     public func lock(whenCondition condition: Int64) {
         while true {
-            let old_condition = OSAtomicAdd64(0, &_condition)
-            if old_condition == condition, OSAtomicCompareAndSwap32(0, 1, &value) {
-                break
+            if OSAtomicCompareAndSwap32(0, 1, &value) {   // 先抢占锁
+                if OSAtomicAdd64(0, &_condition) == condition {  // 在判断条件是否符合
+                    break
+                } else {
+                    unlock()
+                }
             }
             lock_message_receive(port: lock_msg_port)
         }
@@ -64,8 +67,8 @@ public class ConditionLock {
 // MARK: Test
 
 func TestConditionLock() {
-    let thread_count = 1000
-    let conditionLock = ConditionLock(condition: 1001)
+    let thread_count = 2000
+    let conditionLock = ConditionLock(condition: 2001)
     var value = 0
     
     assert(conditionLock != nil)

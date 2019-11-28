@@ -76,7 +76,7 @@ func TestSpinLock() {
         }
     }
 
-    RunLoop.current.run(until: Date() + 3) // for concurrent of child thread
+    RunLoop.current.run(until: Date() + 3)  // for concurrent of child thread
 
     assert(value == thread_count)
 }
