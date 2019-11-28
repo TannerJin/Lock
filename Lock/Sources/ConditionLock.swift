@@ -25,7 +25,7 @@ public class ConditionLock {
     }
     
     deinit {
-        mach_port_deallocate(mach_task_self_, lock_msg_port)
+        freePort(lock_msg_port)
     }
     
     public func lock() {
@@ -47,7 +47,7 @@ public class ConditionLock {
     public func lock(whenCondition condition: Int64) {
         while true {
             if OSAtomicCompareAndSwap32(0, 1, &value) {   // 先抢占锁
-                if OSAtomicAdd64(0, &_condition) == condition {  // 在判断条件是否符合
+                if OSAtomicAdd64(0, &_condition) == condition {  // 再判断条件是否符合
                     break
                 } else {
                     unlock()

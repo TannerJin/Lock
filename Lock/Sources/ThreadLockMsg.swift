@@ -9,34 +9,11 @@
 import Foundation
 
 // MARK: Port
-public func constructPortWith(context: UInt) -> mach_port_t? {
-    var port: mach_port_t = 0
-    
-    var options = mach_port_options_t()
-    options.flags = UInt32(MPO_CONTEXT_AS_GUARD | MPO_QLIMIT | MPO_INSERT_SEND_RIGHT | MPO_STRICT)
-    options.mpl.mpl_qlimit = 1
-    
-    let option_ptr = withUnsafePointer(to: &options, {UnsafeMutablePointer(mutating: $0)})
-    
-    let ret = mach_port_construct(mach_task_self_, option_ptr, mach_port_context_t(context), &port)
-    
-    if ret != KERN_SUCCESS {
-        return nil
-    }
-    
-    return port
-}
-
 @discardableResult
-public func destructPort(_ port: mach_port_t, context: UInt) -> kern_return_t {
-    let ret = mach_port_destruct(mach_task_self_, port, -1, mach_port_context_t(context))
-    return ret
-}
-
-
 public func allocatePort() -> mach_port_t? {
     var port: mach_port_name_t = 0
     let ret = mach_port_allocate(mach_task_self_, MACH_PORT_RIGHT_RECEIVE, &port)
+
     if ret == KERN_SUCCESS {
         let ret2 = mach_port_insert_right(mach_task_self_, port, port, mach_msg_type_name_t(MACH_MSG_TYPE_MAKE_SEND))
         if ret2 == KERN_SUCCESS {
@@ -47,6 +24,12 @@ public func allocatePort() -> mach_port_t? {
     } else {
         return nil
     }
+}
+
+@discardableResult
+public func freePort(_ port: mach_port_t) -> kern_return_t {
+    let ret = mach_port_deallocate(mach_task_self_, port)
+    return ret
 }
 
 
@@ -68,7 +51,7 @@ public func lock_message_send(port remotePort: mach_port_t) -> mach_msg_return_t
     let ret = mach_msg_send(&msg_header)
     #if DEBUG
     if ret != KERN_SUCCESS {
-        assert(false, "msg send failure")
+        assert(false, "msg send failure: " + String(cString: mach_error_string(ret)))
     }
     #endif
     return ret
@@ -91,7 +74,7 @@ public func lock_message_receive(port replyPort: mach_port_t) -> mach_msg_return
     let ret = mach_msg_receive(msg_header_addr)
     #if DEBUG
     if ret != KERN_SUCCESS {
-        assert(false, "msg receive failure")
+        assert(false, "msg receive failure: " + String(cString: mach_error_string(ret)))
     }
     #endif
     return ret

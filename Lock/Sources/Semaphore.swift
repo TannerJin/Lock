@@ -26,7 +26,7 @@ public class Semaphore {
     }
     
     deinit {
-        mach_port_deallocate(mach_task_self_, signal_port)
+        freePort(signal_port)
     }
     
     public func wait() {

@@ -36,8 +36,8 @@ public class ReadWriteLock {
     }
     
     deinit {
-        mach_port_deallocate(mach_task_self_, read_msg_port)
-        mach_port_deallocate(mach_task_self_, write_msg_port)
+        freePort(read_msg_port)
+        freePort(write_msg_port)
     }
     
     // MARK: - Lock
