@@ -39,7 +39,7 @@ public class Semaphore {
                 }
             } else {
                 // 等待信号消息, 等待队列
-                lock_message_receive(port: signal_port)
+                lock_message_receive(at: signal_port)
             }
         }
     }
@@ -47,7 +47,7 @@ public class Semaphore {
     public func signal() {
         if OSAtomicIncrement64(&value) > 0 {
             // 发送信号消息
-            lock_message_send(port: signal_port)
+            lock_message_send(to: signal_port)
         }
     }
 }

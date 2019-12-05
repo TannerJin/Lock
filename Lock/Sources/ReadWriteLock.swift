@@ -61,7 +61,7 @@ public class ReadWriteLock {
                 }
             } else {
                 // 暂停线程调度，等待写线程解锁唤醒
-                lock_message_receive(port: read_msg_port)
+                lock_message_receive(at: read_msg_port)
             }
         }
     }
@@ -79,7 +79,7 @@ public class ReadWriteLock {
                 }
             } else {
                 // 暂停线程调度，等待没有线程持有锁时唤醒
-                lock_message_receive(port: write_msg_port)
+                lock_message_receive(at: write_msg_port)
             }
         }
     }
@@ -97,7 +97,7 @@ public class ReadWriteLock {
         if OSAtomicAdd64(-1, &read_threads_count) == 0 {
             
             // 通知在等待的写线程
-            lock_message_send(port: write_msg_port)
+            lock_message_send(to: write_msg_port)
         }
     }
     
@@ -106,9 +106,9 @@ public class ReadWriteLock {
         OSAtomicCompareAndSwap64(-1, 0, &read_threads_count)
         
         // 通知在等待的写线程
-        lock_message_send(port: write_msg_port)
+        lock_message_send(to: write_msg_port)
         // 通知在等待的读线程
-        lock_message_send(port: read_msg_port)
+        lock_message_send(to: read_msg_port)
     }
 }
 

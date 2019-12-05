@@ -30,7 +30,7 @@ public class ConditionLock {
     
     public func lock() {
         while !OSAtomicCompareAndSwap32(0, 1, &value) {
-            lock_message_receive(port: lock_msg_port)
+            lock_message_receive(at: lock_msg_port)
         }
     }
     
@@ -41,7 +41,7 @@ public class ConditionLock {
                 break
             }
         }
-        lock_message_send(port: lock_msg_port)
+        lock_message_send(to: lock_msg_port)
     }
     
     public func lock(whenCondition condition: Int64) {
@@ -53,7 +53,7 @@ public class ConditionLock {
                     unlock()
                 }
             }
-            lock_message_receive(port: lock_msg_port)
+            lock_message_receive(at: lock_msg_port)
         }
     }
     

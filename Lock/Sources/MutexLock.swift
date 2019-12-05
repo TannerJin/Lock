@@ -29,14 +29,14 @@ public class MutexLock {
     public func lock() {
         while !OSAtomicCompareAndSwap32(0, 1, &value) {
             // 非忙等，将线程加入到消息等待队列；等到解锁消息到来，重新调度尝试获取锁
-            lock_message_receive(port: lock_msg_port)
+            lock_message_receive(at: lock_msg_port)
         }
     }
     
     public func unlock() {
         value = 0
         // 发送解锁消息(xnu: ipc_mqueue_post)
-        lock_message_send(port: lock_msg_port)
+        lock_message_send(to: lock_msg_port)
     }
 }
 

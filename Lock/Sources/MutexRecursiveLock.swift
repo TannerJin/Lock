@@ -34,7 +34,7 @@ class MutexRecursiveLock {
                 break
             }
             // 非忙等，将线程加入到消息等待队列；等到解锁消息到来，重新加入调度队列尝试获取锁  or  thread_suspend(锁持有所有暂停线程)
-            lock_message_receive(port: lock_msg_port)
+            lock_message_receive(at: lock_msg_port)
         }
         
         recursive_count += 1
@@ -46,7 +46,7 @@ class MutexRecursiveLock {
         if recursive_count == 0 {
             thread = -1
             // 发送解锁消息  or  thread_resume
-            lock_message_send(port: lock_msg_port)
+            lock_message_send(to: lock_msg_port)
         }
     }
 }
