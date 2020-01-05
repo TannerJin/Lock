@@ -31,3 +31,25 @@
 基于原子操作，线程通信，线程对象(写线程)，线程数量(读线程)
 
 ## [ConditionLock (条件锁)](https://github.com/TannerJin/Lock/blob/master/Lock/Sources/ConditionLock.swift)
+
+# 不加锁保证变量的安全性
+
+操作变量的多线程在同一核中，多线程读变量可以虚拟并发(保证每次从内存中加载，不利用寄存器以及CPU缓存. 使用`valatile`修饰变量)，但是写变量保证是单一线程
+
+demo如下(参考自libmalloc的`magazine_s->alloc_underway`)
+
+```c
+volatile boolean_t condition;   
+
+// 保证以下代码在同一核的多线程下运行
+while(1) {
+  if (condition) {  // 读变量
+    condition = ！condition  // 写变量
+    break;
+  } else {
+    yield();  // 不写变量，让出该核的时间片
+  }
+}
+```
+
+
