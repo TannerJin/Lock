@@ -8,7 +8,7 @@
 
 import Foundation
 
-// MARK: ConditionLock
+// 条件锁
 
 public class ConditionLock {
     private var _condition: Int64

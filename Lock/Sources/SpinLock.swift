@@ -32,10 +32,10 @@ public class SpinLock {
             let pointer = malloc(MemoryLayout<qos_class_t>.size)
             pointer?.bindMemory(to: qos_class_t.self, capacity: 1).initialize(to: preQosClassSelf)
 
-            if SpinLock.PreQosClassKey == 0 {
-                pthread_key_create(&SpinLock.PreQosClassKey, nil)
+            if Self.PreQosClassKey == 0 {
+                pthread_key_create(&Self.PreQosClassKey, nil)
             }
-            pthread_setspecific(SpinLock.PreQosClassKey, pointer)
+            pthread_setspecific(Self.PreQosClassKey, pointer)
 
             pthread_set_qos_class_self_np(QOS_CLASS_USER_INITIATED, 0)
         }
@@ -44,9 +44,9 @@ public class SpinLock {
     public func unlock() {
         var preQosClassSelf: UnsafeMutablePointer<qos_class_t>?
 
-        if SpinLock.PreQosClassKey != 0 {
-            preQosClassSelf = pthread_getspecific(SpinLock.PreQosClassKey)?.assumingMemoryBound(to: qos_class_t.self)
-            pthread_setspecific(SpinLock.PreQosClassKey, nil)
+        if Self.PreQosClassKey != 0 {
+            preQosClassSelf = pthread_getspecific(Self.PreQosClassKey)?.assumingMemoryBound(to: qos_class_t.self)
+            pthread_setspecific(Self.PreQosClassKey, nil)
         }
 
         value = 0
