@@ -16,6 +16,7 @@
 		A959EC6223866ACB00A918A9 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = A959EC6123866ACB00A918A9 /* main.swift */; };
 		A959EC6A23866AE000A918A9 /* SpinLock.swift in Sources */ = {isa = PBXBuildFile; fileRef = A959EC6923866AE000A918A9 /* SpinLock.swift */; };
 		A959EC6D2386747B00A918A9 /* SpinRecursiveLock.swift in Sources */ = {isa = PBXBuildFile; fileRef = A959EC6C2386747B00A918A9 /* SpinRecursiveLock.swift */; };
+		A9F0CE0D23E81D910083FD5A /* Atomic.c in Sources */ = {isa = PBXBuildFile; fileRef = A9F0CE0C23E81D910083FD5A /* Atomic.c */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -42,6 +43,9 @@
 		A959EC6123866ACB00A918A9 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 		A959EC6923866AE000A918A9 /* SpinLock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpinLock.swift; sourceTree = "<group>"; };
 		A959EC6C2386747B00A918A9 /* SpinRecursiveLock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpinRecursiveLock.swift; sourceTree = "<group>"; };
+		A9F0CE0A23E81D910083FD5A /* Lock-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Lock-Bridging-Header.h"; sourceTree = "<group>"; };
+		A9F0CE0B23E81D910083FD5A /* Atomic.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Atomic.h; sourceTree = "<group>"; };
+		A9F0CE0C23E81D910083FD5A /* Atomic.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = Atomic.c; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -83,6 +87,9 @@
 		A959EC6823866AD200A918A9 /* Sources */ = {
 			isa = PBXGroup;
 			children = (
+				A9F0CE0B23E81D910083FD5A /* Atomic.h */,
+				A9F0CE0C23E81D910083FD5A /* Atomic.c */,
+				A9F0CE0A23E81D910083FD5A /* Lock-Bridging-Header.h */,
 				A93715E22386969000850906 /* README.md */,
 				A959EC6923866AE000A918A9 /* SpinLock.swift */,
 				A959EC6C2386747B00A918A9 /* SpinRecursiveLock.swift */,
@@ -128,6 +135,7 @@
 				TargetAttributes = {
 					A959EC5D23866ACB00A918A9 = {
 						CreatedOnToolsVersion = 11.1;
+						LastSwiftMigration = 1110;
 					};
 				};
 			};
@@ -162,6 +170,7 @@
 				A91CC882238E090300351964 /* ConditionLock.swift in Sources */,
 				A93715DF2386798D00850906 /* MutexRecursiveLock.swift in Sources */,
 				A91CC880238CBE6300351964 /* Semaphore.swift in Sources */,
+				A9F0CE0D23E81D910083FD5A /* Atomic.c in Sources */,
 				A959EC6223866ACB00A918A9 /* main.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -285,10 +294,18 @@
 		A959EC6623866ACB00A918A9 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 8HX9UN9S6G;
 				ENABLE_HARDENED_RUNTIME = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "Lock/Sources/Lock-Bridging-Header.h";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
@@ -296,10 +313,17 @@
 		A959EC6723866ACB00A918A9 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 8HX9UN9S6G;
 				ENABLE_HARDENED_RUNTIME = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "Lock/Sources/Lock-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 			};
 			name = Release;
