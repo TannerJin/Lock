@@ -43,7 +43,7 @@ public class MutexLock {
 
 // MARK: Test
 func TestMutexLock() {
-    let thread_count = 1000
+    let thread_count = 2000
     let lock = MutexLock()
     var value = 0
     
@@ -53,9 +53,9 @@ func TestMutexLock() {
         Thread.detachNewThread {
             Thread.sleep(forTimeInterval: 1)  // for concurrent
             
-            lock!.lock()
+//            lock!.lock()
             value += 1
-            lock!.unlock()
+//            lock!.unlock()
         }
     }
 

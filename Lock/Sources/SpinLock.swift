@@ -15,7 +15,7 @@ public class SpinLock {
     private static var PreQosClassKey: pthread_key_t = 0
 
     public func lock() {
-        while !OSAtomicCompareAndSwap32(0, 1, &value) {}
+        while !LockAtomicCompareAndSwap32(0, 1, &value) {}
 
         // QOS_CLASS_BACKGROUND        : 9
         // QOS_CLASS_UTILITY           : 17
@@ -62,7 +62,7 @@ public class SpinLock {
 // MARK: Test
 func TestSpinLock() {
     let thread_count = 1000
-    let lock = SpinRecursiveLock()
+    let lock = SpinLock()
     var value = 0
 
     for _ in 0..<thread_count {
