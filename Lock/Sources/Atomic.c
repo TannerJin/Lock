@@ -11,7 +11,6 @@
 // MARK: arm64
 
 #if defined(__arm64__) || defined(__aarch64__)
-
 __attribute__((target("lse")))
 int32_t LockAtomicAdd32(int32_t theCount, int32_t* theValue) {
     int32_t result = 0;
@@ -30,6 +29,7 @@ int32_t LockAtomicAdd32(int32_t theCount, int32_t* theValue) {
     return result;
 }
 
+// https://developer.arm.com/docs/dui0801/g/a64-data-transfer-instructions/casa-casal-cas-casl-casal-cas-casl
 __attribute__((target("lse")))
 _Bool LockAtomicCompareAndSwap32(int32_t oldValue, int32_t newValue, int32_t* theValue) {
     _Bool result = 0;
@@ -48,7 +48,6 @@ _Bool LockAtomicCompareAndSwap32(int32_t oldValue, int32_t newValue, int32_t* th
                      );
     return result;
 };
-
 #endif
 
 

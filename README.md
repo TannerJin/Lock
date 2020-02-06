@@ -6,6 +6,10 @@
 // 单核：停止多线程调度(关中断)    
 // 多核：1.锁住总线(禁止内存数据传输到CPU中) or 2.锁住缓存(在CPU缓存行中的该变量地址无效，需要重新从内存中加载)
 
+## [Atomic 原子操作](https://github.com/TannerJin/Lock/blob/master/Lock/Sources/Atomic.c)
+
+基于CPU相关指令
+
 ## [SpinLock (自旋锁)](https://github.com/TannerJin/Lock/blob/master/Lock/Sources/SpinLock.swift)
 
 基于原子操作
