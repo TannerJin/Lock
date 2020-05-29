@@ -34,29 +34,27 @@ public class SpinRecursiveLock {
 
 // MARK: Test
 func TestSpinRecursiveLock() {
-    let thread_count = 500
-    let recursive_count = 3
+    let concurrentCount = 2000
+    let recursiveCount = 3
     let lock = SpinRecursiveLock()
     var value = 0
 
-    for _ in 0..<thread_count {
-        Thread.detachNewThread {
-            Thread.sleep(forTimeInterval: 1)  // for concurrent
-            
-            for _ in 0..<recursive_count {
+    let queue = DispatchQueue(label: "SpinRecursiveLockQueue", qos: .default, attributes: .concurrent)
+    
+    for _ in 0..<concurrentCount {
+        queue.async {
+            for _ in 0..<recursiveCount {
                 lock.lock()
                 value += 1
             }
-            // .
-            // .
-            // .
-            for _ in 0..<recursive_count {
+            for _ in 0..<recursiveCount {
                 lock.unlock()
             }
         }
     }
 
-    RunLoop.current.run(until: Date() + 3)
-
-    assert(value == thread_count*recursive_count)
+    queue.sync(flags: .barrier) { () -> Void in
+        assert(value == concurrentCount * recursiveCount)
+        print("SpinRecursiveLock Test Success")
+    }
 }

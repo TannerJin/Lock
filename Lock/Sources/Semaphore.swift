@@ -14,19 +14,12 @@ public class Semaphore {
     // >0: pass
     // =0: wait
     private var value: Int64
-    private var signal_port: mach_port_t
     
-    public init?(value: Int64) {
-        if let port = allocatePort() {
-            signal_port = port
-            self.value = value
-        } else {
-            return nil
-        }
-    }
+    private var waitThreads = [thread_t]()
+    private var waitThreadsValue: Int32 = 0
     
-    deinit {
-        freePort(signal_port)
+    public init(value: Int64) {
+        self.value = value
     }
     
     public func wait() {
@@ -38,60 +31,41 @@ public class Semaphore {
                     break
                 }
             } else {
-                // 等待信号消息, 等待队列
-                lock_message_receive(at: signal_port)
+                yield()
             }
         }
     }
     
-    public func signal() {
-        if OSAtomicIncrement64(&value) > 0 {
-            // 发送信号消息
-            lock_message_send(to: signal_port)
+    @discardableResult
+    public func signal() -> Int {
+        let _value = OSAtomicIncrement64(&value)
+        if _value > 0 {
+            resume()
         }
+        return Int(_value)
+    }
+    
+    private func yield() {
+        let thread = mach_thread_self()
+        while !OSAtomicCompareAndSwap32(0, 1, &waitThreadsValue) {}
+        waitThreads.append(thread)
+        waitThreadsValue = 0
+        thread_suspend(thread)
+    }
+    
+    private func resume() {
+        var thread: thread_t?
+        while !OSAtomicCompareAndSwap32(0, 1, &waitThreadsValue) {}
+        if waitThreads.count > 0 {
+            thread = waitThreads.removeFirst()  // FIFO
+        }
+        waitThreadsValue = 0
+        if thread != nil { thread_resume(thread!) }
     }
 }
 
 
 // MARK: Test
-
 func TestSemaphore() {
-    let concurrent_count = 1000
-    let semaphore = Semaphore(value: Int64(concurrent_count))
     
-    assert(semaphore != nil)
-    
-    var array = Array<Int>(repeating: 0, count: concurrent_count)
-    let spinLock = SpinLock()
-    
-    for i in 0..<concurrent_count {
-        Thread.detachNewThread {
-            semaphore!.wait()
-            Thread.sleep(forTimeInterval: 0.5)    // for semaphore wait
-            
-            spinLock.lock()
-            array[i] = i                          // 多线程修改
-            spinLock.unlock()
-            
-            Thread.sleep(forTimeInterval: 1)      // for semaphore wait
-            semaphore!.signal()
-        }
-    }
-    
-    Thread.detachNewThread {
-        Thread.sleep(forTimeInterval: 0.5)
-        semaphore?.wait()
-        
-        let orig_result = Array<Int>(0..<concurrent_count).reduce(0) { (result, element) -> Int in
-            result + element
-        }
-        let result = array.reduce(0) { (result, element) -> Int in
-            result + element
-        }
-        assert(result == orig_result)
-        
-        semaphore?.signal()
-    }
-    
-    RunLoop.current.run(until: Date() + 3)    
 }

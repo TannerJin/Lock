@@ -8,7 +8,7 @@
 
 import Foundation
 
-print("Hello, Lock!")
+print("Hello, Lock!\n")
 
 TestSpinLock()
 

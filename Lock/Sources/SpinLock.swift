@@ -61,22 +61,22 @@ public class SpinLock {
 
 // MARK: Test
 func TestSpinLock() {
-    let thread_count = 1000
+    let concurrentCount = 2000
     let lock = SpinLock()
     var value = 0
 
-    for _ in 0..<thread_count {
-        Thread.detachNewThread {
-            Thread.sleep(forTimeInterval: 1)  // for concurrent
-
-            pthread_set_qos_class_self_np(QOS_CLASS_BACKGROUND, 0)   // 降低优先级测试
+    let queue = DispatchQueue(label: "SpinLockQueue", qos: .default, attributes: .concurrent)
+    
+    for _ in 0..<concurrentCount {
+        queue.async {
             lock.lock()
             value += 1
             lock.unlock()
         }
     }
 
-    RunLoop.current.run(until: Date() + 3)  // for concurrent of child thread
-
-    assert(value == thread_count)
+    queue.sync(flags: .barrier) { () -> Void in
+        assert(value == concurrentCount)
+        print("SpinLock Test Success")
+    }
 }

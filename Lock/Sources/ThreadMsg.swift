@@ -41,7 +41,7 @@ private func mach_msgh_bits(remote: mach_msg_bits_t, local: mach_msg_bits_t) -> 
 }
 
 @discardableResult
-public func lock_message_send(to remotePort: mach_port_t) -> mach_msg_return_t {
+public func thread_message_send(to remotePort: mach_port_t) -> mach_msg_return_t {
     var msg_header = mach_msg_header_t()
     msg_header.msgh_remote_port = remotePort
     msg_header.msgh_local_port = mach_port_null
@@ -58,7 +58,7 @@ public func lock_message_send(to remotePort: mach_port_t) -> mach_msg_return_t {
 }
 
 @discardableResult
-public func lock_message_receive(at replyPort: mach_port_t) -> mach_msg_return_t {
+public func thread_message_receive(at replyPort: mach_port_t) -> mach_msg_return_t {
     var msg_header = mach_msg_header_t()
     msg_header.msgh_remote_port = mach_port_null
     msg_header.msgh_local_port = replyPort

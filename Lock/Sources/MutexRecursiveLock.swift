@@ -9,76 +9,76 @@
 import Foundation
 
 // MARK: 递归互斥锁
-
 class MutexRecursiveLock {
-    private var lock_msg_port: mach_port_t
-    
     private var thread: Int = -1
-    private var recursive_count = 0
+    private var recursiveCount = 0
     
-    init?() {
-        if let localPort = allocatePort() {
-            lock_msg_port = localPort
-        } else {
-            return nil
-        }
-    }
-    
-    deinit {
-        freePort(lock_msg_port)
-    }
-    
+    private var waitThreads = [thread_t]()
+    private var waitThreadsValue: Int32 = 0
+
     public func lock() {
         while !OSAtomicCompareAndSwapLong(-1, Int(mach_thread_self()), &thread) {
             if thread == mach_thread_self() {
                 break
             }
-            // 非忙等，将线程加入到消息等待队列；等到解锁消息到来，重新加入调度队列尝试获取锁  or  thread_suspend(锁持有所有暂停线程)
-            lock_message_receive(at: lock_msg_port)
+            yield()
         }
-        
-        recursive_count += 1
+        recursiveCount += 1
+    }
+
+    public func unlock() {
+        recursiveCount -= 1
+        if recursiveCount == 0 {
+            thread = -1
+            resume()
+        }
     }
     
-    public func unlock() {
-        recursive_count -= 1
+    private func yield() {
+        let thread = mach_thread_self()
+        while !OSAtomicCompareAndSwap32(0, 1, &waitThreadsValue) {}
+        waitThreads.append(thread)
+        waitThreadsValue = 0
+        thread_suspend(thread)
+    }
+    
+    private func resume() {
+        var thread: thread_t?
         
-        if recursive_count == 0 {
-            thread = -1
-            // 发送解锁消息  or  thread_resume
-            lock_message_send(to: lock_msg_port)
+        while !OSAtomicCompareAndSwap32(0, 1, &waitThreadsValue) {}
+        if waitThreads.count > 0 {
+            thread = waitThreads.removeFirst()
         }
+        waitThreadsValue = 0
+        
+        if thread != nil { thread_resume(thread!) }
     }
 }
 
 
 // MARK: Test
 func TestMutexRecursiveLock() {
-    let thread_count = 500
-    let recursive_count = 3
+    let concurrentCount = 2000
     let lock = MutexRecursiveLock()
+    let recursiveCount = 5
     var value = 0
-    
-    assert(lock != nil)
 
-    for _ in 0..<thread_count {
-        Thread.detachNewThread {
-            Thread.sleep(forTimeInterval: 1)  // for concurrent
-            
-            for _ in 0..<recursive_count {
-                lock!.lock()
+    let queue = DispatchQueue(label: "MutexRecursiveLockQueue", qos: .default, attributes: .concurrent)
+    
+    for _ in 0..<concurrentCount {
+        queue.async {
+            for _ in 0..<recursiveCount {
+                lock.lock()
                 value += 1
             }
-            // .
-            // .
-            // .
-            for _ in 0..<recursive_count {
-                lock!.unlock()
+            for _ in 0..<recursiveCount {
+                lock.unlock()
             }
         }
     }
 
-    RunLoop.current.run(until: Date() + 3)
-
-    assert(value == thread_count*recursive_count)
+    queue.sync(flags: .barrier) { () -> Void in
+        assert(value == concurrentCount * recursiveCount)
+        print("MutexRecursiveLock Test Success")
+    }
 }

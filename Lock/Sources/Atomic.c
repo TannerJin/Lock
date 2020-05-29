@@ -73,7 +73,7 @@ int32_t LockAtomicAdd32(int32_t theCount, int32_t* theValue) {
 }
 
 // https://blog.csdn.net/xiuye2015/article/details/53406432
-// edi, esi, rdx
+// 0: edi, 1: esi, 2: rdx
 _Bool LockAtomicCompareAndSwap32(int32_t oldValue, int32_t newValue, int32_t* theValue) {
     _Bool result = 0;
     __asm__ volatile(
@@ -85,14 +85,31 @@ _Bool LockAtomicCompareAndSwap32(int32_t oldValue, int32_t newValue, int32_t* th
                      "cmpxchg %%esi, (%%rdx)\n"
                      "je equal\n"           // zf=1: ==
                      "jmp notEqual\n"       // zf=0: !=
-                     "equal:"
+                    "equal:"
                         "mov $1, %0\n"
-                     "notEqual:"
+                        "jmp end\n"
+                    "notEqual:"
                         "mov $0, %0\n"
+                     "end:"
                      :"=&r"(result)
                      :
                      :"memory", "eax"
                      );
+    
+//    asm{
+//        mov eax, edi;
+//        lock;
+//        cmpxchg [rdx], rsi;
+//        je equal;
+//        jmp notEqual;
+//    equal:
+//        mov result, 0x1;
+//        jmp end;
+//    notEqual:
+//        mov result, 0x0;
+//    end:
+//    };
+    
     return result;
 };
 
