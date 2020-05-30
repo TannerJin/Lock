@@ -47,7 +47,7 @@ class MutexRecursiveLock {
         
         while !OSAtomicCompareAndSwap32(0, 1, &waitThreadsValue) {}
         if waitThreads.count > 0 {
-            thread = waitThreads.removeFirst()
+            thread = waitThreads.removeFirst()      // FIFO
         }
         waitThreadsValue = 0
         
