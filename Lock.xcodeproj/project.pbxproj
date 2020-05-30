@@ -87,10 +87,10 @@
 		A959EC6823866AD200A918A9 /* Sources */ = {
 			isa = PBXGroup;
 			children = (
+				A93715E22386969000850906 /* README.md */,
 				A9F0CE0B23E81D910083FD5A /* Atomic.h */,
 				A9F0CE0C23E81D910083FD5A /* Atomic.c */,
 				A9F0CE0A23E81D910083FD5A /* Lock-Bridging-Header.h */,
-				A93715E22386969000850906 /* README.md */,
 				A959EC6923866AE000A918A9 /* SpinLock.swift */,
 				A959EC6C2386747B00A918A9 /* SpinRecursiveLock.swift */,
 				A93715DC2386797700850906 /* MutexLock.swift */,
