@@ -26,7 +26,7 @@
 
 [__ConditionLock (条件锁)__](https://github.com/TannerJin/Lock/blob/master/Lock/Sources/ConditionLock.swift)
 
-# 不加锁保证变量的安全性
+## 不加锁保证变量的安全性
 
 操作变量的多线程在同一核中，多线程读变量可以虚拟并发(保证每次从内存中加载，不利用寄存器以及CPU缓存. 使用`valatile`修饰变量)，但是写变量保证是单一线程
 
