@@ -9,9 +9,7 @@
 import Foundation
 
 // 读写锁
-
 public class ReadWriteLock {
-    
     public enum RWType {
         case read
         case write
@@ -43,26 +41,6 @@ public class ReadWriteLock {
         }
     }
     
-    private func yield() {
-        let thread = mach_thread_self()
-        while !OSAtomicCompareAndSwap32(0, 1, &waitThreadsValue) {}
-        waitThreads.append(thread)
-        waitThreadsValue = 0
-        thread_suspend(thread)
-    }
-    
-    private func resume() {
-        var thread: thread_t?
-        
-        while !OSAtomicCompareAndSwap32(0, 1, &waitThreadsValue) {}
-        if waitThreads.count > 0 {
-            thread = waitThreads.removeFirst()  // FIFO
-        }
-        waitThreadsValue = 0
-        
-        if thread != nil { thread_resume(thread!) }
-    }
-    
     private func lockRead() {
         while true {
             // 没有写线程 (read_threads_count != -1)
@@ -75,6 +53,15 @@ public class ReadWriteLock {
                 }
             } else {
                 yield()
+            }
+        }
+    }
+    
+    private func unlockRead() {
+        let oldValue = OSAtomicAdd64(0, &readThreadsCount)
+        if oldValue > 0 {
+            if OSAtomicIncrement64(&readThreadsCount) == 0 {
+                resume()
             }
         }
     }
@@ -102,14 +89,25 @@ public class ReadWriteLock {
         resume()
     }
     
-    private func unlockRead() {
-        let oldValue = OSAtomicAdd64(0, &readThreadsCount)
-        if oldValue > 0 {
-            if OSAtomicIncrement64(&readThreadsCount) == 0 {
-                resume()
-            }
-        }
-    }
+    private func yield() {
+       let thread = mach_thread_self()
+       while !OSAtomicCompareAndSwap32(0, 1, &waitThreadsValue) {}
+       waitThreads.append(thread)
+       waitThreadsValue = 0
+       thread_suspend(thread)
+   }
+       
+   private func resume() {
+       var thread: thread_t?
+       
+       while !OSAtomicCompareAndSwap32(0, 1, &waitThreadsValue) {}
+       if waitThreads.count > 0 {
+           thread = waitThreads.removeFirst()  // FIFO
+       }
+       waitThreadsValue = 0
+       
+       if thread != nil { thread_resume(thread!) }
+   }
 }
 
 

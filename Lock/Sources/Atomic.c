@@ -113,4 +113,6 @@ _Bool LockAtomicCompareAndSwap32(int32_t oldValue, int32_t newValue, int32_t* th
     return result;
 };
 
+//#define LockLoad(ptr) __asm__ volatile( lwarx )
+
 #endif

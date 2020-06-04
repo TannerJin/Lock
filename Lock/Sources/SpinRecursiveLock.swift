@@ -11,12 +11,13 @@ import Foundation
 // 递归自旋锁
 
 public class SpinRecursiveLock {
-    private var thread: Int = -1
+    private var thread: Int = -1  // valatile 或者使用load-linked指令加载该值
     private var recursive_count = 0
     
     public func lock() {
-        while !OSAtomicCompareAndSwapLong(-1, Int(mach_thread_self()), &thread) {
-            if thread == mach_thread_self() {
+        let currentThread = Int(mach_thread_self())
+        while !OSAtomicCompareAndSwapLong(-1, currentThread, &thread) {
+            if thread == currentThread {
                 break
             }
         }
@@ -24,9 +25,12 @@ public class SpinRecursiveLock {
     }
     
     public func unlock() {
-        recursive_count -= 1
-        if recursive_count == 0 {
-            thread = -1
+        let currentThread = Int(mach_thread_self())
+        if currentThread == thread {
+            recursive_count -= 1
+            if recursive_count == 0 {
+                thread = -1
+            }
         }
     }
 }

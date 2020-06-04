@@ -63,7 +63,7 @@ func TestMutexRecursiveLock() {
     let recursiveCount = 5
     var value = 0
 
-    let queue = DispatchQueue(label: "MutexRecursiveLockQueue", qos: .default, attributes: .concurrent)
+    let queue = DispatchQueue(label: "MutexRecursiveLockQueue", qos: .userInteractive, attributes: .concurrent)
     
     for _ in 0..<concurrentCount {
         queue.async {

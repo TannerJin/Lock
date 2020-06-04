@@ -85,8 +85,8 @@ func TestMutexLock() {
         }
     }
 
-    queue.sync(flags: .barrier, execute: {})
     queue1.sync(flags: .barrier, execute: {})
+    queue.sync(flags: .barrier, execute: {})
     
     assert(value == concurrentCount)
     print("MutexLock Test Success")
