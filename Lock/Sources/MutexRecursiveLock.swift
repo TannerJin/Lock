@@ -18,10 +18,9 @@ class MutexRecursiveLock {
 
     public func lock() {
         while !OSAtomicCompareAndSwapLong(-1, Int(mach_thread_self()), &thread) {
-            if thread == mach_thread_self() {
+            if thread == mach_thread_self() || !yield() {
                 break
             }
-            yield()
         }
         recursiveCount += 1
     }
@@ -34,24 +33,45 @@ class MutexRecursiveLock {
         }
     }
     
-    private func yield() {
-        let thread = mach_thread_self()
+    private func yield() -> Bool {
+        let selfThread = mach_thread_self()
+        
         while !OSAtomicCompareAndSwap32(0, 1, &waitThreadsValue) {}
-        waitThreads.append(thread)
+        
+        if OSAtomicCompareAndSwapLong(-1, Int(selfThread), &thread) {     // 防止竞争bug
+            waitThreadsValue = 0
+            return false
+        }
+        
+        waitThreads.append(selfThread)
         waitThreadsValue = 0
-        thread_suspend(thread)
+        
+        var ret: kern_return_t = -1
+        repeat {
+           ret = thread_suspend(selfThread)
+        } while ret != KERN_SUCCESS
+        
+        return true
     }
     
     private func resume() {
-        var thread: thread_t?
-        
         while !OSAtomicCompareAndSwap32(0, 1, &waitThreadsValue) {}
-        if waitThreads.count > 0 {
-            thread = waitThreads.removeFirst()      // FIFO
+        defer {
+            waitThreadsValue = 0
         }
-        waitThreadsValue = 0
         
-        if thread != nil { thread_resume(thread!) }
+        if waitThreads.count > 0 {
+            let thread = waitThreads.removeFirst()     // FIFO
+            var ret: kern_return_t = -1
+            while true {
+                ret = thread_resume(thread)
+                if ret == KERN_SUCCESS {        // 极极少数情况下, 等待队列中的thread正在执行上面的yield中的thread_suspend函数，此时线程还在running
+                    break
+                } else {
+                    sched_yield()               // 让出一个时间片, 等待thread_suspend执行完
+                }
+            }
+        }
     }
 }
 
