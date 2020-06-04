@@ -58,7 +58,7 @@ class MutexRecursiveLock {
 
 // MARK: Test
 func TestMutexRecursiveLock() {
-    let concurrentCount = 2000
+    let concurrentCount = 500
     let lock = MutexRecursiveLock()
     let recursiveCount = 5
     var value = 0
@@ -67,6 +67,7 @@ func TestMutexRecursiveLock() {
     
     for _ in 0..<concurrentCount {
         queue.async {
+            Thread.sleep(forTimeInterval: 0.01)
             for _ in 0..<recursiveCount {
                 lock.lock()
                 value += 1

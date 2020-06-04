@@ -71,15 +71,16 @@ public class SpinLock {
 
 // MARK: Test
 func TestSpinLock() {
-    let concurrentCount = 2000
+    let concurrentCount = 500
     let lock = SpinLock()
     var value = 0
 
-    let queue = DispatchQueue(label: "SpinLockQueue", qos: .default, attributes: .concurrent)
+    let queue = DispatchQueue(label: "SpinLockQueue", qos: .userInteractive, attributes: .concurrent)
     
     for _ in 0..<concurrentCount {
         queue.async {
             lock.lock()
+            Thread.sleep(forTimeInterval: 0.01)
             value += 1
             lock.unlock()
         }

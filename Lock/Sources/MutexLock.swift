@@ -12,12 +12,12 @@ import Foundation
 
 public class MutexLock {
     private var lockValue: Int32 = 0
-    private var waitThreads = [qos_class_t.RawValue: [thread_t]]()
+    private var waitThreads = [thread_t]()      // 可以考虑优先级队列
     private var waitThreadsValue: Int32 = 0
 
     public func lock() {
         while !OSAtomicCompareAndSwap32(0, 1, &lockValue) {
-            yield()
+            if !yield() { break }   //  之前发现存在竞争bug(当获取到锁的线程释放锁了，调用完resume()了。但还有没获取锁的线程正在执行thread_suspend()，resume失败。造成该线程永远在等待有效锁)
         }
     }
 
@@ -26,35 +26,45 @@ public class MutexLock {
         resume()
     }
     
-    private func yield() {
+    private func yield() -> Bool {
         let thread = mach_thread_self()
-        let qos = qos_class_self().rawValue
         
         while !OSAtomicCompareAndSwap32(0, 1, &waitThreadsValue) {}
         
-        if waitThreads[qos] != nil {
-            waitThreads[qos]?.append(thread)
-        } else {
-            waitThreads[qos] = [thread]
+        if OSAtomicCompareAndSwap32(0, 1, &lockValue) {
+            waitThreadsValue = 0
+            return false
         }
         
+        waitThreads.append(thread)
         waitThreadsValue = 0
-        thread_suspend(thread)
+        
+        var ret: kern_return_t = -1
+        repeat {
+           ret = thread_suspend(thread)
+        } while ret != KERN_SUCCESS
+        
+        return true
     }
     
     private func resume() {
-        var thread: thread_t?
-        
         while !OSAtomicCompareAndSwap32(0, 1, &waitThreadsValue) {}
-        if let maxQos = waitThreads.keys.max() {
-            thread = waitThreads[maxQos]?.removeFirst()     // FIFO
-            if waitThreads[maxQos]?.count == 0 {
-                waitThreads[maxQos] = nil
+        defer {
+            waitThreadsValue = 0
+        }
+        
+        if waitThreads.count > 0 {
+            let thread = waitThreads.removeFirst()     // FIFO
+            var ret: kern_return_t = -1
+            while true {
+                ret = thread_resume(thread)
+                if ret == KERN_SUCCESS {
+                    break
+                } else {
+                    sched_yield()               // 极极少数情况下，thread.run_statu != TH_STATE_WAITING. 让出一个时间片, 等待thread.suspend执行完
+                }
             }
         }
-        waitThreadsValue = 0
-        
-        if thread != nil { thread_resume(thread!) }
     }
 }
 
@@ -62,8 +72,8 @@ public class MutexLock {
 
 // MARK: Test
 func TestMutexLock() {
-    let concurrentCount = 2000
-    let lock = MutexLock()
+    let concurrentCount = 500
+    let lock = MutexLock()  // 可以换成NSLock比较下, 也会比较耗时
     var value = 0
 
     let queue = DispatchQueue(label: "MutexLockQueue", qos: .default, attributes: .concurrent)
@@ -73,12 +83,14 @@ func TestMutexLock() {
         if i % 2 == 0 {
             queue.async {
                 lock.lock()
+                Thread.sleep(forTimeInterval: 0.01)
                 value += 1
                 lock.unlock()
             }
         } else {
             queue1.async {
                 lock.lock()
+                Thread.sleep(forTimeInterval: 0.01)
                 value += 1
                 lock.unlock()
             }
