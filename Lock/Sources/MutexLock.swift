@@ -17,7 +17,7 @@ public class MutexLock {
 
     public func lock() {
         while !OSAtomicCompareAndSwap32(0, 1, &lockValue) {
-            if !yield() { break }   //  之前发现存在竞争bug(当获取到锁的线程释放锁了，调用完resume()了。但还有没获取锁的线程正在执行thread_suspend()，resume失败。造成该线程永远在等待有效锁)
+            if !yield() { break }   //  发现存在竞争bug(当获取到锁的线程释放锁了，调用完resume()了。但还有没获取锁的线程正在执行yield()，未加入等待队列中，造成该线程永远在等待队列)
         }
     }
 
@@ -31,7 +31,7 @@ public class MutexLock {
         
         while !OSAtomicCompareAndSwap32(0, 1, &waitThreadsValue) {}
         
-        if OSAtomicCompareAndSwap32(0, 1, &lockValue) {
+        if OSAtomicCompareAndSwap32(0, 1, &lockValue) {     // 防止竞争bug
             waitThreadsValue = 0
             return false
         }
@@ -58,10 +58,10 @@ public class MutexLock {
             var ret: kern_return_t = -1
             while true {
                 ret = thread_resume(thread)
-                if ret == KERN_SUCCESS {
+                if ret == KERN_SUCCESS {        // 极极少数情况下, 等待队列中的thread正在执行上面的yield中的thread_suspend函数，此时线程还在running
                     break
                 } else {
-                    sched_yield()               // 极极少数情况下，thread.run_statu != TH_STATE_WAITING. 让出一个时间片, 等待thread.suspend执行完
+                    sched_yield()               // 让出一个时间片, 等待thread_suspend执行完
                 }
             }
         }
