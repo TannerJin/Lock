@@ -83,6 +83,7 @@ _Bool LockAtomicCompareAndSwap32(int32_t oldValue, int32_t newValue, int32_t* th
                      // 相等: *theValue = esi, zf=1;
                      // 不等: eax = *theValue, zf=0;
                      "cmpxchg %%esi, (%%rdx)\n"
+                     // 跳转指令有待优化
                      "je equal\n"           // zf=1: ==
                      "jmp notEqual\n"       // zf=0: !=
                     "equal:"
