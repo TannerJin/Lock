@@ -76,7 +76,7 @@ func TestMutexLock() {
     let lock = MutexLock()  // 可以换成NSLock比较下, 也会比较耗时
     var value = 0
 
-    let queue = DispatchQueue(label: "MutexLockQueue", qos: .default, attributes: .concurrent)
+    let queue = DispatchQueue(label: "MutexLockQueue1", qos: .background, attributes: .concurrent)   // 设置一个低优先级
     let queue1 = DispatchQueue(label: "MutexLockQueue2", qos: .userInteractive, attributes: .concurrent)
     
     for i in 0..<concurrentCount {
