@@ -27,15 +27,15 @@ public class MutexLock {
     }
     
     private func yield() -> Bool {
-        let thread = mach_thread_self()
-        
         while !OSAtomicCompareAndSwap32(0, 1, &waitThreadsValue) {}
         
-        if OSAtomicCompareAndSwap32(0, 1, &lockValue) {     // 防止竞争bug
+        // 防止竞争bug(当获取到锁的线程释放锁了，调用完resume()了。但还有没获取锁的线程正在执行yield()，但未加入等待队列中，造成该线程永远在等待队列)
+        if OSAtomicCompareAndSwap32(0, 1, &lockValue) {
             waitThreadsValue = 0
             return false
         }
         
+        let thread = mach_thread_self()
         waitThreads.append(thread)
         waitThreadsValue = 0
         

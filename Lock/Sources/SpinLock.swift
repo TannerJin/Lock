@@ -11,7 +11,7 @@ import Foundation
 // 自旋锁
 
 public class SpinLock {
-    private var value: Int32 = 0
+    private var lockValue: Int32 = 0
     
     private static var PreQosClassKey: pthread_key_t = 0
     private static let swiftOnceRegisterSpinLockThreadKey = {
@@ -24,7 +24,7 @@ public class SpinLock {
     }
 
     public func lock() {
-        while !LockAtomicCompareAndSwap32(0, 1, &value) {
+        while !LockAtomicCompareAndSwap32(0, 1, &lockValue) {
             // sched_yield() 主动放弃时间片？
         }
 
@@ -59,7 +59,7 @@ public class SpinLock {
             pthread_setspecific(Self.PreQosClassKey, nil)
         }
 
-        value = 0
+        lockValue = 0
         
         if preQosClassSelf != nil {
             pthread_set_qos_class_self_np(preQosClassSelf!.pointee, 0)

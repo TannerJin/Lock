@@ -34,11 +34,11 @@ class MutexRecursiveLock {
     }
     
     private func yield() -> Bool {
-        let selfThread = mach_thread_self()
-        
         while !OSAtomicCompareAndSwap32(0, 1, &waitThreadsValue) {}
         
-        if OSAtomicCompareAndSwapLong(-1, Int(selfThread), &thread) {     // 防止竞争bug
+        let selfThread = mach_thread_self()
+        // 防止竞争bug(当获取到锁的线程释放锁了，调用完resume()了。但还有没获取锁的线程正在执行yield()，但未加入等待队列中，造成该线程永远在等待队列)
+        if OSAtomicCompareAndSwapLong(-1, Int(selfThread), &thread) {
             waitThreadsValue = 0
             return false
         }

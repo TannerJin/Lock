@@ -96,8 +96,8 @@
 				A93715DC2386797700850906 /* MutexLock.swift */,
 				A93715DE2386798D00850906 /* MutexRecursiveLock.swift */,
 				A91CC87F238CBE6300351964 /* Semaphore.swift */,
-				A93715E323878B5000850906 /* ReadWriteLock.swift */,
 				A91CC881238E090300351964 /* ConditionLock.swift */,
+				A93715E323878B5000850906 /* ReadWriteLock.swift */,
 				A93715E0238680E100850906 /* ThreadMsg.swift */,
 			);
 			path = Sources;
